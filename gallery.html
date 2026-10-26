@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>图提取 · 图片画廊</title>
+    <link rel="icon" href="icons/icon32.png" />
+    <link rel="stylesheet" href="gallery.css" />
+  </head>
+  <body>
+    <!-- 图标符号表 -->
+    <svg class="svg-sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 4v11m0 0l-4.2-4.2M12 15l4.2-4.2M5 19.5h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path d="M20 11a8 8 0 10-2.34 5.66M20 5v6h-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-help" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.8" />
+        <path d="M9.7 9.3a2.4 2.4 0 114.2 1.7c-.8.8-1.9 1.2-1.9 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        <circle cx="12" cy="17" r="1.1" fill="currentColor" />
+      </symbol>
+      <symbol id="i-image" viewBox="0 0 24 24">
+        <rect x="3.2" y="4.2" width="17.6" height="15.6" rx="3" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <circle cx="8.6" cy="9.5" r="1.5" fill="currentColor" />
+        <path d="M4.6 17.3l4.4-4.4 3.1 3.1 2.4-2.4 4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-external" viewBox="0 0 24 24">
+        <path d="M14 5h5v5M19 5l-7.5 7.5M18 13.5V18a1.5 1.5 0 01-1.5 1.5H6A1.5 1.5 0 014.5 18V7.5A1.5 1.5 0 016 6h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24">
+        <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24">
+        <path d="M3.5 7.5A2.5 2.5 0 016 5h3.6l2 2.2H18a2.5 2.5 0 012.5 2.5v7.8A2.5 2.5 0 0118 20H6a2.5 2.5 0 01-2.5-2.5v-10z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+      </symbol>
+    </svg>
+
+    <header class="appbar">
+      <a class="brand" href="gallery.html" title="图提取 · 图片画廊">
+        <img class="brand__mark" src="icons/icon128.png" alt="" width="34" height="34" />
+        <span class="brand__text">
+          <strong>图提取</strong>
+          <span>ImageGrab</span>
+        </span>
+      </a>
+
+      <div class="scanmeta" id="scanMeta">
+        <span class="scanmeta__dot"></span>
+        <span id="metaText">正在读取图片…</span>
+      </div>
+
+      <div class="appbar__actions">
+        <button class="btn btn--ghost" id="rescanBtn" type="button">
+          <svg class="icon"><use href="#i-refresh"></use></svg>
+          <span>重新获取</span>
+        </button>
+        <button class="btn btn--icon" id="helpBtn" type="button" title="使用说明" aria-label="使用说明">
+          <svg class="icon"><use href="#i-help"></use></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="toolbar" id="toolbar" hidden>
+        <label class="checkbox">
+          <input type="checkbox" id="selectAll" />
+          <span class="checkbox__box"></span>
+          <span>全选</span>
+        </label>
+        <button class="chip" id="invertBtn" type="button">反选</button>
+        <button class="chip" id="clearBtn" type="button">清空</button>
+
+        <span class="toolbar__divider" aria-hidden="true"></span>
+        <span class="toolbar__filter" id="filterNote" hidden></span>
+
+        <div class="toolbar__spacer"></div>
+
+        <label class="select">
+          <span>尺寸</span>
+          <select id="sizeFilter">
+            <option value="0">全部尺寸</option>
+            <option value="100">≥ 100px</option>
+            <option value="400">≥ 400px</option>
+            <option value="800">≥ 800px</option>
+          </select>
+        </label>
+        <label class="select">
+          <span>排序</span>
+          <select id="sortOrder">
+            <option value="page">页面顺序</option>
+            <option value="large">大图优先</option>
+            <option value="small">小图优先</option>
+          </select>
+        </label>
+      </div>
+
+      <section class="grid" id="grid" aria-live="polite"></section>
+
+      <section class="empty" id="empty" hidden>
+        <div class="empty__art" aria-hidden="true">
+          <span class="empty__circle"></span>
+          <svg class="empty__icon"><use href="#i-image"></use></svg>
+          <span class="empty__badge">PNG</span>
+        </div>
+        <h1 class="empty__title">还没有提取到图片</h1>
+        <p class="empty__desc">
+          打开淘宝、天猫、京东或拼多多的商品详情页，点击页面右下角的
+          <strong>「获取图片」</strong>按钮，图片就会集中显示在这里。
+        </p>
+        <ol class="empty__steps">
+          <li><span>1</span>在商品详情页右下角点击「获取图片」</li>
+          <li><span>2</span>等待扫描完成，画廊会自动打开</li>
+          <li><span>3</span>勾选需要的图片，一键下载为 PNG</li>
+        </ol>
+        <button class="btn btn--ghost" id="emptyHelpBtn" type="button">查看完整使用说明</button>
+      </section>
+    </main>
+
+    <div class="actionbar" id="actionbar" hidden>
+      <div class="actionbar__info">
+        <span><strong id="selectedCount">0</strong> 张已选</span>
+        <span class="actionbar__hint">自动转换为 PNG，文件名按顺序编号</span>
+      </div>
+      <div class="actionbar__actions">
+        <button class="btn btn--ghost" id="selectVisibleBtn" type="button">全选当前</button>
+        <button class="btn btn--primary" id="downloadBtn" type="button" disabled>
+          <svg class="icon"><use href="#i-download"></use></svg>
+          <span>下载选中</span>
+        </button>
+      </div>
+    </div>
+
+    <section class="progress" id="progress" hidden aria-live="polite">
+      <div class="progress__head">
+        <strong id="progressTitle">正在下载…</strong>
+        <span id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar">
+        <span id="progressFill"></span>
+      </div>
+      <div class="progress__detail">
+        <span id="progressFile"></span>
+        <span id="progressStats"></span>
+      </div>
+      <div class="progress__actions">
+        <button class="btn btn--ghost" id="openFolderBtn" type="button" hidden>
+          <svg class="icon"><use href="#i-folder"></use></svg>
+          <span>打开下载文件夹</span>
+        </button>
+        <button class="btn btn--ghost" id="cancelBtn" type="button">取消</button>
+        <button class="btn btn--primary" id="closeProgressBtn" type="button" hidden>完成</button>
+      </div>
+    </section>
+
+    <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="图片预览">
+      <button class="lightbox__close" id="lightboxClose" type="button" aria-label="关闭预览">
+        <svg class="icon"><use href="#i-close"></use></svg>
+      </button>
+      <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" type="button" aria-label="上一张">
+        <svg class="icon"><use href="#i-chevron"></use></svg>
+      </button>
+      <figure class="lightbox__figure">
+        <img id="lightboxImg" alt="图片预览" referrerpolicy="no-referrer" />
+        <figcaption class="lightbox__meta">
+          <span id="lightboxMeta"></span>
+          <a id="lightboxOpen" href="#" target="_blank" rel="noreferrer">
+            打开原图
+            <svg class="icon icon--sm"><use href="#i-external"></use></svg>
+          </a>
+        </figcaption>
+      </figure>
+      <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" type="button" aria-label="下一张">
+        <svg class="icon"><use href="#i-chevron"></use></svg>
+      </button>
+      <div class="lightbox__actions">
+        <button class="btn btn--primary" id="lightboxDownload" type="button">
+          <svg class="icon"><use href="#i-download"></use></svg>
+          <span>下载这张 PNG</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal" id="helpModal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="modal__backdrop" data-close="help"></div>
+      <div class="modal__panel">
+        <header class="modal__head">
+          <div>
+            <p class="eyebrow">使用说明</p>
+            <h2 id="helpTitle">三步提取商品图</h2>
+          </div>
+          <button class="btn btn--icon" id="helpClose" type="button" aria-label="关闭">
+            <svg class="icon"><use href="#i-close"></use></svg>
+          </button>
+        </header>
+        <div class="modal__body">
+          <ol class="helpsteps">
+            <li>
+              <span class="helpsteps__num">1</span>
+              <div><strong>在详情页获取图片</strong><p>打开淘宝 / 天猫 / 京东 / 拼多多商品详情页，点击右下角悬浮的「获取图片」按钮。</p></div>
+            </li>
+            <li>
+              <span class="helpsteps__num">2</span>
+              <div><strong>勾选需要的图片</strong><p>画廊支持全选、反选、按尺寸筛选和单张预览。鼠标悬停可查看原图。</p></div>
+            </li>
+            <li>
+              <span class="helpsteps__num">3</span>
+              <div><strong>一键下载 PNG</strong><p>点击「下载选中」，图片会自动转换并保存到浏览器默认下载目录。</p></div>
+            </li>
+          </ol>
+
+          <div class="helptip">
+            <strong>小技巧</strong>
+            <ul>
+              <li>任意网页都可以点击浏览器工具栏的「图提取」图标强制提取。</li>
+              <li>懒加载图片无需滚动页面，插件会读取 <code>data-src</code> 等属性。</li>
+              <li>下载文件名从 <code>商品图_001.png</code> 开始自动编号。</li>
+              <li>Edge 用户：在 <code>edge://extensions</code> 中开启「开发人员模式」加载插件。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <script src="gallery.js"></script>
+  </body>
+</html>
