@@ -1,0 +1,16 @@
+{
+  "name": "imagegrab-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "图提取 ImageGrab 的单元测试与 Edge 端到端测试",
+  "scripts": {
+    "test": "node unit-core.js && node e2e.js",
+    "test:unit": "node unit-core.js",
+    "test:e2e": "node e2e.js",
+    "test:e2e:product": "node e2e-product-page.js",
+    "fixtures": "python fixtures/make-fixtures.py"
+  },
+  "dependencies": {
+    "playwright": "^1.64.1"
+  }
+}
