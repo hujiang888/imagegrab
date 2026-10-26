@@ -1,0 +1,269 @@
+/**
+ * 图提取 ImageGrab — 悬浮按钮样式
+ * 所有类名以 ig- 前缀 + #imagegrab-widget 限定，避免影响宿主页面。
+ */
+
+#imagegrab-widget {
+  all: initial;
+  position: fixed !important;
+  right: 22px !important;
+  bottom: 110px !important;
+  z-index: 2147483646 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  pointer-events: none !important;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+  direction: ltr !important;
+}
+
+#imagegrab-widget.ig-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#imagegrab-widget.ig-hidden {
+  display: none !important;
+}
+
+#imagegrab-widget * {
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+}
+
+/* ------------------------------- 主按钮 ------------------------------- */
+
+#imagegrab-widget .ig-fab {
+  all: initial;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  height: 46px !important;
+  padding: 0 18px 0 14px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #4f7cff 0%, #7c5cf8 55%, #9b5cf6 100%) !important;
+  color: #fff !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.2px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  box-shadow: 0 10px 24px rgba(79, 124, 255, 0.36), 0 2px 6px rgba(17, 24, 39, 0.14) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+}
+
+#imagegrab-widget .ig-fab:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 30px rgba(79, 124, 255, 0.44), 0 4px 10px rgba(17, 24, 39, 0.16) !important;
+  filter: brightness(1.03) !important;
+}
+
+#imagegrab-widget .ig-fab:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+#imagegrab-widget .ig-fab:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 0 6px rgba(79, 124, 255, 0.55),
+    0 12px 28px rgba(79, 124, 255, 0.4) !important;
+}
+
+#imagegrab-widget .ig-fab:disabled {
+  cursor: progress !important;
+  opacity: 0.9 !important;
+}
+
+#imagegrab-widget .ig-fab__icon,
+#imagegrab-widget .ig-fab__text {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#imagegrab-widget .ig-fab__icon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+#imagegrab-widget .ig-fab__icon svg {
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+#imagegrab-widget .ig-fab__count {
+  position: absolute !important;
+  top: -5px !important;
+  right: -3px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 19px !important;
+  height: 19px !important;
+  padding: 0 5px !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: #4f7cff !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  box-shadow: 0 2px 6px rgba(17, 24, 39, 0.18) !important;
+}
+
+#imagegrab-widget .ig-fab__count[hidden] {
+  display: none !important;
+}
+
+/* ------------------------------- 加载态 ------------------------------- */
+
+#imagegrab-widget .ig-fab__spinner {
+  display: none !important;
+  width: 15px !important;
+  height: 15px !important;
+  border: 2px solid rgba(255, 255, 255, 0.45) !important;
+  border-top-color: #ffffff !important;
+  border-radius: 50% !important;
+  animation: ig-spin 0.7s linear infinite !important;
+}
+
+#imagegrab-widget .ig-fab.is-loading .ig-fab__icon {
+  display: none !important;
+}
+
+#imagegrab-widget .ig-fab.is-loading .ig-fab__spinner {
+  display: inline-block !important;
+}
+
+@keyframes ig-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------- 关闭按钮 ----------------------------- */
+
+#imagegrab-widget .ig-close {
+  all: initial;
+  position: absolute !important;
+  top: -7px !important;
+  left: -7px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(17, 24, 39, 0.78) !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  opacity: 0.6;
+  transition: opacity 0.18s ease, transform 0.18s ease !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+#imagegrab-widget .ig-close:hover {
+  opacity: 1;
+  transform: scale(1.08) !important;
+}
+
+#imagegrab-widget .ig-close svg {
+  display: block !important;
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* -------------------------------- 提示 -------------------------------- */
+
+#imagegrab-widget .ig-toast {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: calc(100% + 12px) !important;
+  width: max-content !important;
+  max-width: 290px !important;
+  padding: 9px 13px !important;
+  border-radius: 12px !important;
+  background: rgba(17, 24, 39, 0.94) !important;
+  color: #f9fafb !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0.1px !important;
+  text-align: left !important;
+  white-space: normal !important;
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.28) !important;
+  pointer-events: none !important;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+
+#imagegrab-widget .ig-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#imagegrab-widget .ig-toast--success {
+  background: rgba(6, 95, 70, 0.96) !important;
+}
+
+#imagegrab-widget .ig-toast--error {
+  background: rgba(153, 27, 27, 0.96) !important;
+}
+
+/* ------------------------------- 响应式 ------------------------------- */
+
+@media (max-width: 768px) {
+  #imagegrab-widget {
+    right: 14px !important;
+    bottom: 86px !important;
+  }
+
+  #imagegrab-widget .ig-fab {
+    height: 43px !important;
+    padding: 0 15px 0 12px !important;
+    font-size: 13px !important;
+  }
+
+  #imagegrab-widget .ig-toast {
+    max-width: 240px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #imagegrab-widget,
+  #imagegrab-widget .ig-fab,
+  #imagegrab-widget .ig-close,
+  #imagegrab-widget .ig-toast {
+    transition: none !important;
+  }
+
+  #imagegrab-widget .ig-fab__spinner {
+    animation-duration: 1.4s !important;
+  }
+}
+
+@media print {
+  #imagegrab-widget {
+    display: none !important;
+  }
+}
