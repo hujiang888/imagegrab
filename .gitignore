@@ -1,0 +1,12 @@
+# 依赖与测试产物
+node_modules/
+tests/output/
+tests/*.log
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.tmp
