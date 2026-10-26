@@ -10,11 +10,14 @@
 ## 核心功能
 
 - **一键提取**：扫描 `img`、`srcset`、`data-src` 等懒加载属性、`background-image`、JSON-LD 与 `og:image`。
-- **智能过滤**：排除图标、logo、头像、占位图、1×1 像素图，以及短边小于 100px 的小图；自动去重、补全相对路径。
-- **集中预览**：新标签页响应式网格，显示真实尺寸与原始格式，支持单张放大、左右切换。
+- **相关性识别**：默认只保留商品主图、详情图与试穿/模特图；推荐商品、买家秀、店铺广告、横幅、二维码等自动排除。
+- **智能过滤**：额外排除图标、logo、头像、占位图、1×1 像素图，以及短边小于 100px 的小图；自动去重、补全相对路径。
+- **集中预览**：新标签页响应式网格，显示真实尺寸与原始格式，支持「商品图 / 全部」切换、单张放大、左右切换。
 - **自由勾选**：全选 / 反选 / 清空 / 按尺寸筛选 / 按大图排序，支持 `Ctrl / ⌘ + A`。
 - **统一 PNG**：JPG、WebP、GIF 等在后台通过 OffscreenCanvas 转为 PNG，保留透明通道与原始分辨率。
 - **批量下载**：逐张显示进度、成功与失败反馈，文件名自动编号为 `商品图_001.png`。
+
+> 默认视图只展示商品图与试穿图；需要查看被过滤的推荐、评价等图片时，点击画廊顶部的「全部」即可。
 
 | 详情页悬浮按钮 | 图片画廊 |
 | --- | --- |
@@ -33,7 +36,7 @@
 
 ## 安装（Edge）
 
-1. 下载 [`docs/downloads/ImageGrab-v1.0.0.zip`](docs/downloads/ImageGrab-v1.0.0.zip) 并解压到本地文件夹（确保第一层有 `manifest.json`）。
+1. 下载 [`docs/downloads/ImageGrab-v1.1.0.zip`](docs/downloads/ImageGrab-v1.1.0.zip) 并解压到本地文件夹（确保第一层有 `manifest.json`）。
 2. 打开 `edge://extensions`，开启「开发人员模式」。
 3. 点击「加载解压缩的扩展」，选择解压后的文件夹。
 4. 打开商品详情页，点击右下角「获取图片」。
@@ -77,12 +80,12 @@ ImageGrab/
 cd tests
 npm install
 
-npm run test:unit         # 纯函数单测（29 项）
-npm run test:e2e          # Edge 端到端：提取 → 画廊 → 真实下载 PNG
+npm run test:unit         # 纯函数单测（35 项）
+npm run test:e2e          # Edge 端到端：提取 → 相关性过滤 → 画廊 → 真实下载 PNG
 npm run test:e2e:product  # 真实 manifest：模拟 item.jd.com 自动注入按钮
 ```
 
-`test:e2e` 会启动本机 Edge、加载扩展、在本地模拟详情页中提取 11 张图片、勾选全部并校验下载文件的 PNG 签名与尺寸（含 1800×1800 大图），同时产出官网截图到 `docs/assets/`。
+`test:e2e` 会启动本机 Edge、加载扩展，在模拟详情页中扫描出 19 张候选图（11 张商品图 + 8 张推荐/评价/广告图），校验默认只展示商品图、切换「全部」可见被过滤图片，并真实下载 11 个 PNG（含 1800×1800 大图）。同时产出官网截图到 `docs/assets/`。
 
 ### 打包
 
@@ -90,7 +93,7 @@ npm run test:e2e:product  # 真实 manifest：模拟 item.jd.com 自动注入按
 powershell -ExecutionPolicy Bypass -File scripts/package.ps1
 ```
 
-产物：`docs/downloads/ImageGrab-v1.0.0.zip`，`manifest.json` 位于压缩包根目录。
+产物：`docs/downloads/ImageGrab-v1.1.0.zip`，`manifest.json` 位于压缩包根目录。
 
 ### 预览官网
 
@@ -118,11 +121,26 @@ python -m http.server 8080 -d docs
 
 - 不扫描跨域 iframe 和 Closed Shadow DOM 内的图片。
 - 电商平台改版后，若新增懒加载属性或详情页 URL 规则，需要同步更新 `lib/extract-core.js` 与 `content.js`。
+- 相关性识别基于页面结构、商品链接与图片比例，平台大幅改版时可能出现误判；可切换画廊「全部」手动挑选。
 - 极少数图片源站会校验防盗链，可能只能下载原格式。
 - 需要登录 / 验证码才能看到的图片，扩展无法绕过。
+
+## 更新日志
+
+### v1.1.0（2026-10-26）
+
+- 新增商品图相关性识别：默认只保留主图、详情图、试穿/模特图。
+- 自动排除推荐商品、买家秀、店铺广告、横幅、二维码等无关图片。
+- 画廊新增「商品图 / 全部」切换，被过滤的图片仍可手动查看和下载。
+- 商品图与无关图分开计数，扫描结果优先保留商品图。
+
+### v1.0.0（2026-10-26）
+
+- 首个公开版本：淘宝、天猫、京东、拼多多图片提取，智能过滤、集中预览、批量下载 PNG。
 
 ## 开源协议
 
 [MIT](LICENSE) © 2026 ImageGrab Contributors
 
 > 演示页中的商品图与「京选商城」页面均为本地生成的测试素材，仅用于功能展示，不涉及真实商品。
+
