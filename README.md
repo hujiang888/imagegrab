@@ -2,6 +2,9 @@
 
 一款基于 Manifest V3 的 Edge / Chrome 浏览器扩展：在淘宝、天猫、京东、拼多多商品详情页一键提取所有图片，集中预览、自由勾选，批量下载为统一格式的 PNG。
 
+> 官网：<https://hujiang888.github.io/imagegrab/>  
+> 仓库：<https://github.com/hujiang888/imagegrab>
+
 ![图提取画廊](docs/assets/screenshot-gallery.png)
 
 ## 核心功能
