@@ -459,17 +459,22 @@
   /* 预览                                                                */
   /* ------------------------------------------------------------------ */
 
+  function visiblePositionOf(index) {
+    return state.visible.findIndex((item) => item.index === index);
+  }
+
   function updateLightbox() {
     const image = state.scan.images[state.lightboxIndex];
     if (!image) return;
+    const position = visiblePositionOf(state.lightboxIndex);
     els.lightboxImg.src = image.url;
     els.lightboxImg.alt = image.alt || '商品图片';
     els.lightboxOpen.href = image.url;
-    els.lightboxMeta.textContent = `${state.lightboxIndex + 1} / ${state.scan.images.length} · ${
+    els.lightboxMeta.textContent = `${position >= 0 ? position + 1 : 1} / ${state.visible.length} · ${
       image.width ? image.width + ' × ' + image.height : '尺寸未知'
     } · ${formatOf(image.url)}`;
-    els.lightboxPrev.disabled = state.lightboxIndex <= 0;
-    els.lightboxNext.disabled = state.lightboxIndex >= state.scan.images.length - 1;
+    els.lightboxPrev.disabled = position <= 0;
+    els.lightboxNext.disabled = position < 0 || position >= state.visible.length - 1;
   }
 
   function openLightbox(index) {
@@ -493,9 +498,10 @@
 
   function stepLightbox(delta) {
     if (els.lightbox.hidden || !state.scan) return;
-    const next = state.lightboxIndex + delta;
-    if (next < 0 || next >= state.scan.images.length) return;
-    state.lightboxIndex = next;
+    const position = visiblePositionOf(state.lightboxIndex);
+    const next = position + delta;
+    if (next < 0 || next >= state.visible.length) return;
+    state.lightboxIndex = state.visible[next].index;
     updateLightbox();
   }
 

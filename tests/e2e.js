@@ -264,6 +264,20 @@ async function main() {
     await gallery.waitForTimeout(300);
     assert((await gallery.locator('.card').count()) === EXPECTED_COUNT, '切回商品图应恢复默认数量');
 
+    // 预览大图的左右切换只应在当前“商品图”范围内
+    await gallery.locator('.card__thumb').first().click();
+    await gallery.waitForSelector('#lightbox:not([hidden])', { timeout: 5000 });
+    const firstLightboxMeta = (await gallery.locator('#lightboxMeta').textContent()).trim();
+    assert(firstLightboxMeta.includes('/ 11'), '预览序号应基于当前可见商品图，实际：' + firstLightboxMeta);
+    for (let i = 0; i < EXPECTED_COUNT - 1; i += 1) {
+      await gallery.keyboard.press('ArrowRight');
+      await gallery.waitForTimeout(80);
+    }
+    const lastLightboxMeta = (await gallery.locator('#lightboxMeta').textContent()).trim();
+    assert(lastLightboxMeta.startsWith('11 / 11'), '最后一张商品图预览序号应为 11 / 11，实际：' + lastLightboxMeta);
+    assert(await gallery.locator('#lightboxNext').isDisabled(), '最后一张时“下一张”应禁用');
+    await gallery.locator('#lightboxClose').click();
+
     // 截图用：把演示域名改成 item.jd.com，让官网素材更真实（不影响功能断言）
     await worker.evaluate(async (id) => {
       const key = 'scan:' + id;
