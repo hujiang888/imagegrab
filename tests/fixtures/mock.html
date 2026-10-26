@@ -82,6 +82,19 @@
       .spec { border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
       .spec b { display: block; font-size: 13px; margin-bottom: 4px; }
       .spec span { color: var(--muted); font-size: 12px; }
+      .page-banner { margin-top: 16px; border-radius: 8px; overflow: hidden; }
+      .page-banner img { width: 100%; height: 200px; object-fit: cover; }
+      .recommend-box, .comment-box, .coupon-box { background: #fff; border-radius: 8px; margin-top: 16px; padding: 24px; }
+      .recommend-box h2, .comment-box h2 { margin: 0 0 14px; font-size: 17px; }
+      .recommend-list { display: flex; gap: 14px; }
+      .recommend-list a { flex: 1; display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; }
+      .recommend-list img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+      .review-item { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #4a5058; }
+      .review-item .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+      .review-imgs { display: flex; gap: 10px; margin-top: 12px; }
+      .review-imgs img { width: 160px; height: 160px; border-radius: 6px; object-fit: cover; }
+      .coupon-box { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
+      .coupon-box img { width: 100px; height: 100px; }
       footer.site { margin-top: 34px; padding: 30px 0 40px; background: #fff; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
       footer.site .wrap { display: flex; justify-content: space-between; align-items: center; }
       footer.site .pay { display: flex; gap: 8px; align-items: center; }
@@ -203,6 +216,7 @@
           loading="lazy"
         />
         <img src="big.jpg" alt="高清细节大图" width="1800" height="1800" loading="lazy" />
+        <img src="tryon.png" alt="模特试穿效果展示" width="900" height="900" loading="lazy" />
 
         <div class="specs">
           <div class="spec"><b>单元</b><span>40mm 生物振膜</span></div>
@@ -210,6 +224,40 @@
           <div class="spec"><b>续航</b><span>60 小时（关降噪）</span></div>
           <div class="spec"><b>重量</b><span>238g</span></div>
         </div>
+      </section>
+
+      <!-- 以下为无关图片区域：用于验证相关性过滤 -->
+      <section class="page-banner">
+        <img src="bg.jpg?banner=1" alt="春季大促广告横幅" width="1400" height="640" loading="lazy" />
+      </section>
+
+      <section class="recommend-box">
+        <h2>猜你喜欢</h2>
+        <div class="recommend-list">
+          <a href="//item.jd.com/999000001.html">
+            <img src="p1.png?rec=1" alt="推荐商品：香氛" width="900" height="900" loading="lazy" />
+          </a>
+          <a href="//item.jd.com/999000002.html">
+            <img src="p2.png?rec=2" alt="推荐商品：耳机" width="900" height="900" loading="lazy" />
+          </a>
+        </div>
+      </section>
+
+      <section class="comment-box">
+        <h2>买家评价</h2>
+        <div class="review-item">
+          <img class="avatar" src="user1.png" alt="用户头像" width="120" height="120" loading="lazy" />
+          <div>音质不错，降噪给力，戴一天也不夹耳朵。</div>
+        </div>
+        <div class="review-imgs">
+          <img src="p3.png?review=1" alt="买家秀" width="900" height="900" loading="lazy" />
+          <img src="p4.png?review=2" alt="买家秀" width="900" height="900" loading="lazy" />
+        </div>
+      </section>
+
+      <section class="coupon-box">
+        <img src="code.png" alt="优惠券二维码" width="240" height="240" loading="lazy" />
+        <span>扫码领 40 元优惠券</span>
       </section>
 
       <div class="hidden" aria-hidden="true">

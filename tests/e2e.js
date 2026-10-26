@@ -19,6 +19,7 @@ const ROOT = path.resolve(__dirname, '..');
 const FIXTURES = path.join(__dirname, 'fixtures');
 const DOCS_ASSETS = path.join(ROOT, 'docs', 'assets');
 const EXPECTED_COUNT = 11;
+const EXPECTED_TOTAL = 19;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -221,15 +222,47 @@ async function main() {
     }, scanResult.scanId);
     assert(scanRecord, '扫描记录应已保存');
     const urls = scanRecord.images.map((image) => image.url);
-    assert(urls.some((url) => /lazy\.webp$/.test(url)), '应提取 data-src 懒加载图');
-    assert(urls.some((url) => /bg\.jpg$/.test(url)), '应提取 background-image');
-    assert(urls.some((url) => /big\.jpg$/.test(url)), '应提取大图');
+    const productUrls = scanRecord.images.filter((image) => image.relevant !== false).map((image) => image.url);
+    const otherUrls = scanRecord.images.filter((image) => image.relevant === false).map((image) => image.url);
+    assert(urls.length === EXPECTED_TOTAL, `扫描记录应包含 ${EXPECTED_TOTAL} 张，实际 ${urls.length}`);
+    assert(productUrls.length === EXPECTED_COUNT, `商品图应为 ${EXPECTED_COUNT} 张，实际 ${productUrls.length}`);
+    assert(otherUrls.length === EXPECTED_TOTAL - EXPECTED_COUNT, `无关图应为 ${EXPECTED_TOTAL - EXPECTED_COUNT} 张，实际 ${otherUrls.length}`);
+    assert(scanRecord.stats.product === EXPECTED_COUNT, '统计中的商品图数量应正确');
+    assert(scanRecord.stats.other === EXPECTED_TOTAL - EXPECTED_COUNT, '统计中的无关图数量应正确');
+    assert(productUrls.some((url) => /tryon\.png$/.test(url)), '应保留模特试穿图');
+    assert(!productUrls.some((url) => /(bg\.jpg|rec=|review=)/.test(url)), '商品图不应包含横幅/推荐/评价图');
+    assert(otherUrls.some((url) => /rec=1/.test(url)), '推荐商品图应被标记为无关');
+    assert(otherUrls.some((url) => /review=1/.test(url)), '买家秀应被标记为无关');
+    assert(otherUrls.some((url) => /banner=1/.test(url)), '广告横幅应被标记为无关');
     assert(!urls.some((url) => /(thumb\.jpg|icon\.png|pixel\.png|logo\.svg)$/.test(url)), '应过滤小图与图标');
     assert(new Set(urls).size === urls.length, '图片 URL 应去重');
-    log('extracted urls:', urls.map((url) => url.split('/').pop()).join(', '));
+    log('product urls:', productUrls.map((url) => url.split('/').pop()).join(', '));
+    log('other urls:', otherUrls.map((url) => url.split('/').pop()).join(', '));
 
     const cardCount = await gallery.locator('.card').count();
-    assert(cardCount === EXPECTED_COUNT, `画廊应展示 ${EXPECTED_COUNT} 张，实际 ${cardCount}`);
+    assert(cardCount === EXPECTED_COUNT, `画廊默认应展示 ${EXPECTED_COUNT} 张商品图，实际 ${cardCount}`);
+    assert(
+      (await gallery.locator('#metaText').textContent()).includes('11 张商品图'),
+      '画廊标题应显示商品图数量'
+    );
+    assert(
+      (await gallery.locator('#filterNote').textContent()).includes('8 张无关图片'),
+      '过滤提示应显示被排除的无关图数量'
+    );
+
+    // 切换到“全部”应能看到被过滤的 8 张图
+    await gallery.locator('[data-scope="all"]').click();
+    await gallery.waitForTimeout(300);
+    const allCardCount = await gallery.locator('.card').count();
+    assert(allCardCount === EXPECTED_TOTAL, `“全部”模式应展示 ${EXPECTED_TOTAL} 张，实际 ${allCardCount}`);
+    const allCardUrls = await gallery.locator('.card img').evaluateAll((imgs) => imgs.map((img) => img.src));
+    assert(allCardUrls.some((url) => /rec=1/.test(url)), '“全部”模式应包含推荐图');
+    assert(allCardUrls.some((url) => /review=1/.test(url)), '“全部”模式应包含买家秀');
+    fs.mkdirSync(path.join(__dirname, 'output'), { recursive: true });
+    await gallery.screenshot({ path: path.join(__dirname, 'output', 'gallery-all.png') });
+    await gallery.locator('[data-scope="product"]').click();
+    await gallery.waitForTimeout(300);
+    assert((await gallery.locator('.card').count()) === EXPECTED_COUNT, '切回商品图应恢复默认数量');
 
     // 截图用：把演示域名改成 item.jd.com，让官网素材更真实（不影响功能断言）
     await worker.evaluate(async (id) => {

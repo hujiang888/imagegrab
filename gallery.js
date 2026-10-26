@@ -20,6 +20,7 @@
     selectVisibleBtn: document.getElementById('selectVisibleBtn'),
     invertBtn: document.getElementById('invertBtn'),
     clearBtn: document.getElementById('clearBtn'),
+    scopeButtons: Array.from(document.querySelectorAll('.segmented__btn[data-scope]')),
     sizeFilter: document.getElementById('sizeFilter'),
     sortOrder: document.getElementById('sortOrder'),
     downloadBtn: document.getElementById('downloadBtn'),
@@ -52,6 +53,7 @@
   const state = {
     scan: null,
     selected: new Set(),
+    scope: 'product',
     filter: 0,
     sort: 'page',
     visible: [],
@@ -96,6 +98,15 @@
     }
   }
 
+  /** 兼容旧版本扫描记录：没有 relevant 字段时视为商品图 */
+  function isProductImage(image) {
+    return Boolean(image) && image.relevant !== false;
+  }
+
+  function countProductImages(images) {
+    return (Array.isArray(images) ? images : []).filter(isProductImage).length;
+  }
+
   function toast(message, type, duration) {
     const el = document.createElement('div');
     el.className = 'toast' + (type && type !== 'info' ? ' toast--' + type : '');
@@ -135,16 +146,27 @@
   function renderMeta() {
     const scan = state.scan;
     const host = String(scan.host || '').replace(/^www\./i, '');
+    const productCount = countProductImages(scan.images);
+    const otherCount = scan.images.length - productCount;
     els.metaText.innerHTML =
       `<span class="meta-strong">${escapeAttr(host)}</span>` +
-      `<span class="meta-sep">·</span>${scan.images.length} 张图片` +
+      `<span class="meta-sep">·</span>${productCount} 张商品图` +
       `<span class="meta-sep">·</span>${escapeAttr(formatTime(scan.scannedAt))}`;
 
     const stats = scan.stats || {};
     const skipped = (stats.skippedSmall || 0) + (stats.skippedNoise || 0);
-    if (skipped > 0) {
+    const notes = [];
+    if (otherCount > 0) {
+      notes.push(
+        state.scope === 'all' ? `包含 ${otherCount} 张可能无关的图片` : `已过滤 ${otherCount} 张无关图片`
+      );
+    }
+    if (skipped > 0) notes.push(`${skipped} 张图标 / 小图已排除`);
+    if (notes.length) {
       els.filterNote.hidden = false;
-      els.filterNote.textContent = `已自动过滤 ${skipped} 张图标 / 小图`;
+      els.filterNote.textContent = notes.join(' · ');
+    } else {
+      els.filterNote.hidden = true;
     }
   }
 
@@ -153,7 +175,10 @@
   /* ------------------------------------------------------------------ */
 
   function getVisibleItems() {
-    const items = state.scan.images.map((image, index) => ({ image, index }));
+    let items = state.scan.images.map((image, index) => ({ image, index }));
+    if (state.scope === 'product') {
+      items = items.filter(({ image }) => isProductImage(image));
+    }
     const filtered = state.filter
       ? items.filter(({ image }) => {
           const w = Number(image.width) || 0;
@@ -177,18 +202,23 @@
 
   function createCard(image, index) {
     const card = document.createElement('article');
-    card.className = 'card' + (state.selected.has(index) ? ' is-selected' : '');
+    const productImage = isProductImage(image);
+    card.className = 'card' + (state.selected.has(index) ? ' is-selected' : '') + (productImage ? '' : ' is-other');
     card.dataset.index = String(index);
 
     const hasSize = Number(image.width) > 0 && Number(image.height) > 0;
     const dimsText = hasSize ? `${image.width} × ${image.height}` : '加载中…';
     const alt = image.alt || '商品图片 ' + (index + 1);
+    const flag = productImage
+      ? ''
+      : `<span class="card__flag" title="${escapeAttr(image.reason || '未识别为商品图')}">无关</span>`;
 
     card.innerHTML = `
       <label class="card__check" title="选择这张图片">
         <input type="checkbox" ${state.selected.has(index) ? 'checked' : ''} aria-label="选择第 ${index + 1} 张图片" />
         <span class="card__checkbox"></span>
       </label>
+      ${flag}
       <button class="card__thumb" type="button" aria-label="预览第 ${index + 1} 张图片">
         <img src="${escapeAttr(image.url)}" alt="${escapeAttr(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
         <span class="card__zoom">预览</span>
@@ -239,6 +269,30 @@
     state.visible.forEach(({ image, index }) => fragment.appendChild(createCard(image, index)));
     els.grid.appendChild(fragment);
     updateActionbar();
+  }
+
+  function updateScopeButtons() {
+    els.scopeButtons.forEach((button) => {
+      const active = button.dataset.scope === state.scope;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function setScope(scope) {
+    if (scope !== 'product' && scope !== 'all') return;
+    if (scope === state.scope) return;
+
+    state.scope = scope;
+    // 切回“商品图”时，取消已选中的无关图片，避免误下载
+    if (scope === 'product' && state.scan) {
+      state.scan.images.forEach((image, index) => {
+        if (!isProductImage(image)) state.selected.delete(index);
+      });
+    }
+    updateScopeButtons();
+    renderMeta();
+    renderGrid();
   }
 
   /* ------------------------------------------------------------------ */
@@ -465,6 +519,10 @@
   /* ------------------------------------------------------------------ */
 
   function bindEvents() {
+    els.scopeButtons.forEach((button) => {
+      button.addEventListener('click', () => setScope(button.dataset.scope));
+    });
+
     els.selectAll.addEventListener('change', () => {
       applySelection(getSelectableIndices(), els.selectAll.checked);
     });
@@ -618,6 +676,13 @@
 
     state.scan = scan;
     document.title = `${scan.pageTitle || '商品详情页'} · 图提取`;
+
+    // 一页里没有任何可识别的商品图时，退化为“全部”，避免用户看到空画廊
+    if (countProductImages(scan.images) === 0 && scan.images.length > 0) {
+      state.scope = 'all';
+      updateScopeButtons();
+      toast('没有识别到明确的商品图，已显示全部图片', 'info', 4500);
+    }
 
     renderMeta();
     renderGrid();

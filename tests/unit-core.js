@@ -123,4 +123,33 @@ check('懒加载属性覆盖三大平台', () => {
   );
 });
 
+console.log('商品 ID 与相关性');
+check('解析京东商品 ID', () => {
+  assert.strictEqual(IG.productIdFromUrlParts('item.jd.com', '/100012043978.html', ''), '100012043978');
+  assert.strictEqual(IG.productIdFromUrlParts('item.m.jd.com', '/product/100012043978.html', ''), '100012043978');
+});
+check('解析淘宝 / 天猫商品 ID', () => {
+  assert.strictEqual(IG.productIdFromUrlParts('item.taobao.com', '/item.htm', '?id=654321'), '654321');
+  assert.strictEqual(IG.productIdFromUrlParts('detail.tmall.com', '/item.htm', '?id=987654'), '987654');
+});
+check('解析拼多多商品 ID', () => {
+  assert.strictEqual(
+    IG.productIdFromUrlParts('mobile.yangkeduo.com', '/goods.html', '?goods_id=112233'),
+    '112233'
+  );
+});
+check('识别“其他商品”的推荐链接', () => {
+  const ctx = { base: 'https://item.jd.com/100012043978.html', productId: '100012043978' };
+  assert.strictEqual(IG.isForeignProductLink('//item.jd.com/999000001.html', ctx), true);
+  assert.strictEqual(IG.isForeignProductLink('//item.jd.com/100012043978.html', ctx), false);
+  assert.strictEqual(IG.isForeignProductLink('#', ctx), false);
+});
+check('og / JSON-LD 图片默认视为商品图', () => {
+  assert.strictEqual(IG.classifyImage({ source: 'meta', width: 800, height: 800 }, {}).relevant, true);
+  assert.strictEqual(IG.classifyImage({ source: 'json-ld', width: 800, height: 800 }, {}).relevant, true);
+});
+check('无 DOM 上下文的背景图默认视为无关图', () => {
+  assert.strictEqual(IG.classifyImage({ source: 'background', width: 1400, height: 300 }, {}).relevant, false);
+});
+
 console.log(`\n单元测试通过：${passed} 项`);

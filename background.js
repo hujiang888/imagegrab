@@ -72,19 +72,24 @@ function setBadge(tabId, text, color) {
 async function saveScan(payload, sender) {
   const images = (Array.isArray(payload && payload.images) ? payload.images : [])
     .filter((item) => item && typeof item.url === 'string' && /^https?:\/\//i.test(item.url))
-    .slice(0, 300)
+    .slice(0, 400)
     .map((item, index) => ({
       url: item.url,
       width: Number(item.width) || 0,
       height: Number(item.height) || 0,
       source: item.source || 'img',
       alt: item.alt || '',
+      relevant: item.relevant !== false,
+      category: item.category || (item.relevant === false ? 'other' : 'product'),
+      reason: item.reason || '',
       order: index + 1
     }));
 
   if (!images.length) {
     return { ok: false, error: '没有可展示的图片' };
   }
+
+  const productCount = images.filter((item) => item.relevant).length;
 
   const scan = {
     id: makeId(),
@@ -101,7 +106,8 @@ async function saveScan(payload, sender) {
   pruneScans().catch(() => {});
 
   if (sender.tab && sender.tab.id != null) {
-    setBadge(sender.tab.id, images.length > 99 ? '99+' : String(images.length), '#4F7CFF');
+    const badgeCount = productCount || images.length;
+    setBadge(sender.tab.id, badgeCount > 99 ? '99+' : String(badgeCount), '#4F7CFF');
   }
 
   await chrome.tabs.create({
@@ -109,7 +115,7 @@ async function saveScan(payload, sender) {
     active: true
   });
 
-  return { ok: true, id: scan.id, count: images.length };
+  return { ok: true, id: scan.id, count: productCount, total: images.length };
 }
 
 async function pruneScans() {

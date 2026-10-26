@@ -76,6 +76,23 @@
         <button class="chip" id="invertBtn" type="button">反选</button>
         <button class="chip" id="clearBtn" type="button">清空</button>
 
+        <div class="segmented" role="group" aria-label="图片范围">
+          <button
+            class="segmented__btn is-active"
+            type="button"
+            data-scope="product"
+            aria-pressed="true"
+            title="只显示商品主图、详情图与试穿/模特图"
+          >商品图</button>
+          <button
+            class="segmented__btn"
+            type="button"
+            data-scope="all"
+            aria-pressed="false"
+            title="显示被过滤的推荐、评价、广告等图片"
+          >全部</button>
+        </div>
+
         <span class="toolbar__divider" aria-hidden="true"></span>
         <span class="toolbar__filter" id="filterNote" hidden></span>
 
@@ -217,6 +234,7 @@
           <div class="helptip">
             <strong>小技巧</strong>
             <ul>
+              <li>默认只显示商品主图、详情图与试穿/模特图；点击工具栏「全部」可查看被过滤的图片。</li>
               <li>任意网页都可以点击浏览器工具栏的「图提取」图标强制提取。</li>
               <li>懒加载图片无需滚动页面，插件会读取 <code>data-src</code> 等属性。</li>
               <li>下载文件名从 <code>商品图_001.png</code> 开始自动编号。</li>

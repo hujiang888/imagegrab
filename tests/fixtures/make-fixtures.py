@@ -206,6 +206,42 @@ def make_big():
     print("saved big.jpg")
 
 
+def tryon():
+    """模特试穿图：戴耳机的半身像，用于验证“试穿/模特图”会被保留。"""
+    img = base((255, 237, 213), (254, 215, 170))
+    d = ImageDraw.Draw(img, "RGBA")
+
+    # 肩膀 / 上衣
+    d.polygon(
+        [(p(18), p(92)), (p(82), p(92)), (p(73), p(64)), (p(27), p(64))],
+        fill=(79, 124, 255, 240),
+    )
+    d.line([p(50), p(66), p(50), p(74)], fill=(67, 56, 202, 120), width=lw(1.2))
+
+    # 脖子
+    d.rounded_rectangle([p(45), p(51), p(55), p(68)], radius=p(4), fill=(214, 163, 127, 255))
+
+    # 头发与脸
+    d.ellipse([p(31), p(16), p(69), p(60)], fill=(59, 40, 36, 255))
+    d.ellipse([p(36), p(23), p(64), p(59)], fill=(248, 207, 174, 255))
+    d.chord([p(35), p(14), p(65), p(44)], 180, 360, fill=(59, 40, 36, 255))
+
+    # 眼睛与微笑
+    d.ellipse([p(43), p(38), p(46), p(41)], fill=(30, 41, 59, 255))
+    d.ellipse([p(54), p(38), p(57), p(41)], fill=(30, 41, 59, 255))
+    d.arc([p(46), p(43), p(54), p(50)], 20, 160, fill=(190, 92, 92, 255), width=lw(0.7))
+    d.ellipse([p(40), p(44), p(44), p(47)], fill=(244, 114, 182, 80))
+    d.ellipse([p(56), p(44), p(60), p(47)], fill=(244, 114, 182, 80))
+
+    # 耳机
+    d.arc([p(30), p(19), p(70), p(57)], 180, 360, fill=(31, 41, 55, 255), width=lw(4.2))
+    d.rounded_rectangle([p(27), p(36), p(37), p(57)], radius=p(4.5), fill=(31, 41, 55, 255))
+    d.rounded_rectangle([p(63), p(36), p(73), p(57)], radius=p(4.5), fill=(31, 41, 55, 255))
+    d.rounded_rectangle([p(29.5), p(40), p(34.5), p(53)], radius=p(2.4), fill=(129, 140, 248, 255))
+    d.rounded_rectangle([p(65.5), p(40), p(70.5), p(53)], radius=p(2.4), fill=(129, 140, 248, 255))
+    return img
+
+
 def make_extras():
     # 懒加载图
     Image.open(os.path.join(OUT, "p4.png")).convert("RGB").resize((800, 800), Image.LANCZOS).save(
@@ -223,6 +259,33 @@ def make_extras():
     )
     Image.new("RGB", (32, 32), (79, 124, 255)).save(os.path.join(OUT, "icon.png"))
     Image.new("RGB", (1, 1), (255, 255, 255)).save(os.path.join(OUT, "pixel.png"))
+
+    # 用户头像（评价区，应被过滤）
+    avatar = gradient(240, 240, (255, 228, 230), (224, 231, 255))
+    ad = ImageDraw.Draw(avatar, "RGBA")
+    ad.ellipse([70, 44, 170, 144], fill=(248, 207, 174, 255))
+    ad.ellipse([92, 74, 104, 86], fill=(30, 41, 59, 255))
+    ad.ellipse([136, 74, 148, 86], fill=(30, 41, 59, 255))
+    ad.arc([104, 96, 136, 122], 20, 160, fill=(190, 92, 92, 255), width=4)
+    ad.polygon([(30, 240), (210, 240), (186, 170), (54, 170)], fill=(79, 124, 255, 220))
+    avatar.resize((120, 120), Image.LANCZOS).save(os.path.join(OUT, "user1.png"))
+
+    # 优惠券二维码（应被过滤）
+    qr = Image.new("RGB", (240, 240), "white")
+    qd = ImageDraw.Draw(qr)
+    rng = random.Random(9)
+    cell = 20
+    for gy in range(12):
+        for gx in range(12):
+            if rng.random() < 0.45:
+                qd.rectangle([gx * cell, gy * cell, (gx + 1) * cell - 1, (gy + 1) * cell - 1], fill=(20, 20, 24))
+    for ox, oy in [(0, 0), (160, 0), (0, 160)]:
+        qd.rectangle([ox, oy, ox + 79, oy + 79], fill="white")
+        qd.rectangle([ox, oy, ox + 79, oy + 79], outline=(20, 20, 24), width=10)
+        qd.rectangle([ox + 28, oy + 28, ox + 51, oy + 51], fill=(20, 20, 24))
+    qr.save(os.path.join(OUT, "code.png"))
+
+    save(tryon(), "tryon.png")
     with open(os.path.join(OUT, "logo.svg"), "w", encoding="utf-8") as f:
         f.write(
             '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">'

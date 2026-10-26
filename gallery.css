@@ -392,6 +392,46 @@ a {
   cursor: not-allowed;
 }
 
+/* 商品图 / 全部 切换 */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: #f3f6fb;
+}
+
+.segmented__btn {
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.segmented__btn:hover {
+  color: #4338ca;
+}
+
+.segmented__btn.is-active {
+  background: #fff;
+  color: #4338ca;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+}
+
+.segmented__btn:focus-visible {
+  outline: 2px solid rgba(79, 124, 255, 0.5);
+  outline-offset: 1px;
+}
+
 .select {
   display: inline-flex;
   align-items: center;
@@ -515,6 +555,25 @@ a {
   color: #9ca3af;
   font-size: 12px;
   background: #f8fafc;
+}
+
+/* “全部”模式下标记被过滤的图片 */
+.card__flag {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  z-index: 3;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: rgba(100, 116, 139, 0.9);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
 }
 
 .card__zoom {
@@ -1298,6 +1357,11 @@ code {
   .card__check {
     top: 12px;
     left: 12px;
+  }
+
+  .card__flag {
+    top: 12px;
+    right: 12px;
   }
 
   .card__meta {

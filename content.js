@@ -164,8 +164,11 @@
       return { ok: false, error: String(error) };
     }
 
-    const count = result.images.length;
-    if (!count) {
+    const totalCount = result.images.length;
+    const productCount =
+      result.stats && typeof result.stats.product === 'number' ? result.stats.product : totalCount;
+
+    if (!totalCount) {
       setLoading(false);
       showToast('没有找到可下载的商品图，试试滚动页面加载更多图片', 'error');
       return { ok: false, error: 'empty' };
@@ -185,9 +188,13 @@
       if (!response || !response.ok) {
         throw new Error((response && response.error) || '后台没有响应');
       }
-      setCount(count);
-      showToast(`已提取 ${count} 张图片，正在打开画廊…`, 'success');
-      return { ok: true, count, scanId: response.id };
+      setCount(productCount);
+      if (productCount > 0) {
+        showToast(`已提取 ${productCount} 张商品图，正在打开画廊…`, 'success');
+      } else {
+        showToast('没有识别到明确的商品图，已打开画廊查看全部图片');
+      }
+      return { ok: true, count: productCount, total: totalCount, scanId: response.id };
     } catch (error) {
       showToast('无法打开图片画廊，请刷新页面后重试', 'error');
       return { ok: false, error: String(error) };
